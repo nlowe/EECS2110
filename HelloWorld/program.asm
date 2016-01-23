@@ -15,10 +15,8 @@ Message    DB  'Hello World! Foobar!', 13, 10, '$'
 
 .code
 Hello   PROC
-  mov ax, @data
-  mov ds, ax
+  _LdSeg ds, @data
   sPutStr offset message
-  mov ax, 4c00h
-  int 21h
+  _Exit 00h
 Hello   ENDP
   END Hello
