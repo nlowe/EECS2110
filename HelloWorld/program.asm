@@ -1,8 +1,7 @@
 ; --------------------------------
 ; | Include libraries and macros |
 ; --------------------------------
-include pcmac.inc
-includelib UTIL.LIB
+include ..\lib\pcmac.inc
 
 ; =================================================
 ; Hello World in Intel Assembler
