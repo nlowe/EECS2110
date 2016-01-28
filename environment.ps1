@@ -13,8 +13,8 @@ function Build-Project{
 
     Push-Location $ProjectPath
 
-    Invoke-Expression "$global:masm $FileName,$ObjectFile"
-    Invoke-Expression "&$linker --% $ObjectFile,$OutputFile,,..\lib\$LinkTo,,"
+    Invoke-Expression "$global:masm /Zi /Zd $FileName,$ObjectFile"
+    Invoke-Expression "&$linker --% /CODEVIEW $ObjectFile,$OutputFile,$OutputFile.map,..\lib\$LinkTo,,"
     
     Pop-Location
 }

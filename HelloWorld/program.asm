@@ -15,7 +15,7 @@ Message    DB  'Hello World! Foobar!', 13, 10, '$'
 .code
 Hello   PROC
   _LdSeg ds, @data
-  sPutStr offset message
+  sPutStr message
   _Exit 00h
 Hello   ENDP
   END Hello
