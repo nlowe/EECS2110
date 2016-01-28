@@ -19,6 +19,7 @@ includelib ..\lib\UTIL.LIB
 CR				EQU 13		; Carriage Return
 LF				EQU 10		; Line Feed
 EOS				EQU '$'		; DOS End of string terminator
+RET_OK			EQU 00h		; Return code for OK
 INCH_PER_FOOT	EQU 12		; The number of inches per foot
 INCH3_PER_FOOT3 EQU 1728	; The number of cubic inches per cubic foot
 
@@ -111,24 +112,34 @@ main            PROC
   mul       inputLength         ; dx:ax *= inputLenght
   mul       inputHeight         ; dx:ax *= inputHeight
 
-  mov       resultInches, ax
+  mov       resultInches, ax	; Store the total result in inches
 
-  ; TODO: Calculate the result in cubic feet and remainder inches
+  mov		bx, INCH3_PER_FOOT3 ; We will be comparing the intermediate to a cubic foot
+  cmp		ax, bx
+  jl		RESULT				; We have less than one cubic foot, just print the result
+DIVMOD:
+  inc		resultFeet			; Increment the feet count by one
+  sub		ax, bx				; Subtract one cubic foot
+  cmp		ax, bx				; Compare the remaining inches to a cubic foot
+  jl		RESULT				; Break out if we have less than a cubic foot remaining
+  jmp		DIVMOD
+RESULT:
+  mov		resultPartial, ax	; Store the remaining inches
 
-  _PutStr   output_1           ; Print total cubic feet...
+  _PutStr   output_1            ; Print total cubic feet...
   mov       ax, resultFeet
   call      PutDec
 
-  _PutStr   output_2           ; and inches
+  _PutStr   output_2            ; and inches
   mov       ax, resultPartial
   call      PutDec
 
-  _PutStr   output_3           ; or total cubic inches
+  _PutStr   output_3            ; or total cubic inches
   mov       ax, resultInches
   call      PutDec
 
   _PutStr   output_4
 
-  _Exit     00h
+  _Exit     RET_OK
 main            ENDP
   END       main
