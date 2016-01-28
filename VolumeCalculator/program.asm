@@ -13,6 +13,15 @@
 include ..\lib\pcmac.inc
 includelib ..\lib\UTIL.LIB
 
+; ==============================================================================
+; | Constants used in this file												   |
+; ==============================================================================
+CR				EQU 13		; Carriage Return
+LF				EQU 10		; Line Feed
+EOS				EQU '$'		; DOS End of string terminator
+INCH_PER_FOOT	EQU 12		; The number of inches per foot
+INCH3_PER_FOOT3 EQU 1728	; The number of cubic inches per cubic foot
+
 ; ===========================     Start of Setup    ============================
 .model small		; Small Memory MODEL
 .586				; Pentium Instruction Set
@@ -22,12 +31,12 @@ includelib ..\lib\UTIL.LIB
 ; ===========================  Start of Data Segment ===========================
 .data
 ; ---------------------------  Input Prompt Strings  ---------------------------
-widthFeetPrompt     DB  'Width (feet)> $'
-widthInchesPrompt   DB  'Width (inches)> $'
-heightFeetPrompt    DB  'Height (feet)> $'
-heightInchesPrompt  DB  'Height (inches)> $'
-lengthFeetPrompt    DB  'Length (feet)> $'
-lengthInchesPrompt  DB  'Length (inches)> $'
+widthFeetPrompt     DB  'Width (feet)> ', EOS
+widthInchesPrompt   DB  'Width (inches)> ', EOS
+heightFeetPrompt    DB  'Height (feet)> ', EOS
+heightInchesPrompt  DB  'Height (inches)> ', EOS
+lengthFeetPrompt    DB  'Length (feet)> ', EOS
+lengthInchesPrompt  DB  'Length (inches)> ', EOS
 ; ------------------------------------------------------------------------------
 
 ; ---------------------------       Variables        ---------------------------
@@ -40,14 +49,14 @@ resultInches  DW  0000h                   	   ; Calculated result (inches)
 ; ------------------------------------------------------------------------------
 
 ; ---------------------------     Output Message     ---------------------------
-output_1      DB  'Your volume is $'           ; These four strings are part of
-output_2      DB  ' cu. ft. and $'             ; the output message. They are
-output_3      DB  ' cu. inches or $'           ; broken up to substitute the
-output_4      DB  ' cu. inches', 13, 10, '$'   ; calculated values in the output
+output_1      DB  'Your volume is ', EOS       ; These four strings are part of
+output_2      DB  ' cu. ft. and ', EOS         ; the output message. They are
+output_3      DB  ' cu. inches or ', EOS       ; broken up to substitute the
+output_4      DB  ' cu. inches', CR, LF, EOS   ; calculated values in the output
 ; ------------------------------------------------------------------------------
 
 ; ---------------------------    Output Message      ---------------------------
-err_overflow    DB  'Input too large', 13, 10, '$'
+err_overflow    DB  'Input too large', CR, LF, EOS
 ; ------------------------------------------------------------------------------
 
 ; ===========================   End of Data Segment  ===========================
@@ -65,7 +74,7 @@ main            PROC
 
   _PutStr   widthFeetPrompt     ; Prompt the user for the width (feet)
   call		GetDec
-  mov		bx, 12
+  mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
   mov		inputWidth, ax		; Store the intermediate result
   
@@ -76,7 +85,7 @@ main            PROC
 
   _PutStr   heightFeetPrompt    ; Prompt the user for the height (feet)
   call		GetDec
-  mov		bx, 12
+  mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
   mov		inputHeight, ax		; Store the intermediate result
   
@@ -87,7 +96,7 @@ main            PROC
 
   _PutStr   lengthFeetPrompt    ; Prompt the user for the length (feet)
   call		GetDec
-  mov		bx, 12
+  mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
   mov		inputLength, ax		; Store the intermediate result
   
