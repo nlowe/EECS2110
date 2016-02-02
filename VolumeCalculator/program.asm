@@ -20,6 +20,7 @@ CR				EQU 13		; Carriage Return
 LF				EQU 10		; Line Feed
 EOS				EQU '$'		; DOS End of string terminator
 RET_OK			EQU 00h		; Return code for OK
+RET_OVERFLOW	EQU 01h		; Return code for overflow
 INCH_PER_FOOT	EQU 12		; The number of inches per foot
 INCH3_PER_FOOT3 EQU 1728	; The number of cubic inches per cubic foot
 
@@ -56,6 +57,7 @@ output_4	  DB  ' cu. inches', CR, LF, EOS   ; calculated values in the output
 ; ---------------------------	 Output Message		 ---------------------------
 greeting		DB	'Enter input as <feet> <inches>', CR, LF, EOS
 err_overflow	DB	'Input too large', CR, LF, EOS
+blank			DB	CR, LF, EOS
 ; ------------------------------------------------------------------------------
 
 ; ===========================	End of Data Segment	 ===========================
@@ -76,6 +78,7 @@ main			PROC
   call		GetDec
   mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
+  jo		OVERFLOW		; Check if the number was too large
   mov		inputWidth, ax		; Store the intermediate result
   
   call		GetDec				; Now get the partial inches
@@ -86,6 +89,7 @@ main			PROC
   call		GetDec
   mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
+  jo		OVERFLOW		; Check if the number was too large
   mov		inputHeight, ax		; Store the intermediate result
   
   call		GetDec				; Now get the partial inches
@@ -96,6 +100,7 @@ main			PROC
   call		GetDec
   mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
+  jo		OVERFLOW		; Check if the number was too large
   mov		inputLength, ax		; Store the intermediate result
   
   call		GetDec				; Now get the partial inches
@@ -106,7 +111,9 @@ main			PROC
   mov		dx, 0000h
   mov		ax, inputWidth		; dx:ax = inputWidth
   mul		inputLength			; dx:ax *= inputLenght
+  jo		OVERFLOW		; Check if the number was too large
   mul		inputHeight			; dx:ax *= inputHeight
+  jo		OVERFLOW		; Check if the number was too large
 
   mov		resultInches, ax	; Store the total result in inches
 
@@ -119,6 +126,10 @@ DIVMOD:
   cmp		ax, bx				; Compare the remaining inches to a cubic foot
   jl		RESULT				; Break out if we have less than a cubic foot remaining
   jmp		DIVMOD
+OVERFLOW:
+  _PutStr	blank
+  _PutStr	err_overflow
+  _Exit		RET_OVERFLOW
 RESULT:
   mov		resultPartial, ax	; Store the remaining inches
 
