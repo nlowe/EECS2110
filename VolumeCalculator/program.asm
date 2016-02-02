@@ -32,12 +32,9 @@ INCH3_PER_FOOT3 EQU 1728	; The number of cubic inches per cubic foot
 ; ===========================  Start of Data Segment ===========================
 .data
 ; ---------------------------  Input Prompt Strings	 ---------------------------
-widthFeetPrompt		DB	'Width (feet)> ', EOS
-widthInchesPrompt	DB	'Width (inches)> ', EOS
-heightFeetPrompt	DB	'Height (feet)> ', EOS
-heightInchesPrompt	DB	'Height (inches)> ', EOS
-lengthFeetPrompt	DB	'Length (feet)> ', EOS
-lengthInchesPrompt	DB	'Length (inches)> ', EOS
+widthPrompt		DB	'Width> ', EOS
+heightPrompt	DB	'Height> ', EOS
+lengthPrompt	DB	'Length> ', EOS
 ; ------------------------------------------------------------------------------
 
 ; ---------------------------		Variables		 ---------------------------
@@ -57,6 +54,7 @@ output_4	  DB  ' cu. inches', CR, LF, EOS   ; calculated values in the output
 ; ------------------------------------------------------------------------------
 
 ; ---------------------------	 Output Message		 ---------------------------
+greeting		DB	'Enter input as <feet> <inches>', CR, LF, EOS
 err_overflow	DB	'Input too large', CR, LF, EOS
 ; ------------------------------------------------------------------------------
 
@@ -73,36 +71,34 @@ start:
 main			PROC
   _LdSeg	ds, @data			; Setup the data segment
 
-  _PutStr	widthFeetPrompt		; Prompt the user for the width (feet)
+  _PutStr	greeting			; Tell the user how to input the data
+  _PutStr	widthPrompt			; Prompt the user for the width (feet)
   call		GetDec
   mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
   mov		inputWidth, ax		; Store the intermediate result
   
-  _PutStr	widthInchesPrompt	; Prompt the user for the width (inches)
-  call		GetDec
+  call		GetDec				; Now get the partial inches
   add		ax, inputWidth		; Add the inches from the feet component
   mov		inputWidth, ax		; And store the total input width
 
-  _PutStr	heightFeetPrompt	; Prompt the user for the height (feet)
+  _PutStr	heightPrompt		; Prompt the user for the height (feet)
   call		GetDec
   mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
   mov		inputHeight, ax		; Store the intermediate result
   
-  _PutStr	heightInchesPrompt	; Prompt the user for the height (inches)
-  call		GetDec
+  call		GetDec				; Now get the partial inches
   add		ax, inputHeight		; Add the inches from the feet component
   mov		inputHeight, ax		; And store the total input height
 
-  _PutStr	lengthFeetPrompt	; Prompt the user for the length (feet)
+  _PutStr	lengthPrompt		; Prompt the user for the length (feet)
   call		GetDec
   mov		bx, INCH_PER_FOOT
   mul		bx					; Multiply by 12 to convert to inches
   mov		inputLength, ax		; Store the intermediate result
   
-  _PutStr	lengthInchesPrompt	; Prompt the user for the length (inches)
-  call		GetDec
+  call		GetDec				; Now get the partial inches
   add		ax, inputLength		; Add the inches from the feet component
   mov		inputLength, ax		; And store the total input length
 
