@@ -8,7 +8,7 @@
 ;
 
 ; ==============================================================================
-; | Include libraries and macros (Include path is setup by the build script)   |
+; | Include libraries and macros                                               |
 ; ==============================================================================
 include ..\lib\pcmac.inc
 includelib ..\lib\UTIL.LIB
@@ -77,7 +77,7 @@ main			PROC
   _PutStr	widthPrompt			; Prompt the user for the width (feet)
   call		GetDec
   mov		bx, INCH_PER_FOOT
-  mul		bx					; Multiply by 12 to convert to inches
+  imul		bx					; Multiply by 12 to convert to inches
   jo		OVERFLOW		; Check if the number was too large
   mov		inputWidth, ax		; Store the intermediate result
   
@@ -88,7 +88,7 @@ main			PROC
   _PutStr	heightPrompt		; Prompt the user for the height (feet)
   call		GetDec
   mov		bx, INCH_PER_FOOT
-  mul		bx					; Multiply by 12 to convert to inches
+  imul		bx					; Multiply by 12 to convert to inches
   jo		OVERFLOW		; Check if the number was too large
   mov		inputHeight, ax		; Store the intermediate result
   
@@ -99,7 +99,7 @@ main			PROC
   _PutStr	lengthPrompt		; Prompt the user for the length (feet)
   call		GetDec
   mov		bx, INCH_PER_FOOT
-  mul		bx					; Multiply by 12 to convert to inches
+  imul		bx					; Multiply by 12 to convert to inches
   jo		OVERFLOW		; Check if the number was too large
   mov		inputLength, ax		; Store the intermediate result
   
@@ -110,9 +110,9 @@ main			PROC
   ; Calculate result
   mov		dx, 0000h
   mov		ax, inputWidth		; dx:ax = inputWidth
-  mul		inputLength			; dx:ax *= inputLenght
+  imul		inputLength			; dx:ax *= inputLenght
   jo		OVERFLOW		; Check if the number was too large
-  mul		inputHeight			; dx:ax *= inputHeight
+  imul		inputHeight			; dx:ax *= inputHeight
   jo		OVERFLOW		; Check if the number was too large
 
   mov		resultInches, ax	; Store the total result in inches
