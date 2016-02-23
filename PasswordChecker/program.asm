@@ -11,6 +11,7 @@
 ; | Include libraries and macros                                               |
 ; ==============================================================================
 include ..\lib\pcmac.inc
+include .\utils.inc
 
 ; ==============================================================================
 ; | Constants used in this file												   |
@@ -33,6 +34,22 @@ LOWERCASE_UPPER		EQU	'z'			; The upper bound for lower-case characters
 
 UPPERCASE_LOWER		EQU 'A'			; The lower bound for upper-case characters
 UPPERCASE_UPPER		EQU 'Z'			; The upper bound for upper-case characters
+
+; Special characters accepted are broken into 5 ranges
+; This excludes non-printable characters
+SPECIAL_1_LOWER		EQU ' '
+SPECIAL_1_UPPER		EQU '/'
+
+SPECIAL_2_LOWER		EQU ':'
+SPECIAL_2_UPPER		EQU '@'
+
+SPECIAL_3_LOWER		EQU '['
+SPECIAL_3_UPPER		EQU '`'
+
+SPECIAL_4_LOWER		EQU '{'
+SPECIAL_4_UPPER		EQU '~'
+
+SPECIAL_EXTRA		EQU 80h			; Anything from the extended set
 
 RET_OK				EQU 00h			; Return code for OK
 
@@ -74,22 +91,11 @@ missing_special	DB  'At least one special character is required', CR, LF, EOS
 too_short		DB	'Password must be at least 8 characters', CR, LF, EOS
 too_long		DB	'Corporate dictates your password must be no longer than 20 characters...', CR, LF, EOS
 blank			DB	CR, LF, EOS
-
-debug_1			DB	'Your password had ', EOS
-debug_2			DB	' numbers, ', EOS
-debug_3			DB	' lower case letters, ', EOS
-debug_4			DB	' upper case letters, ', EOS
-debug_5			DB	' special characters, and was ', EOS
-debug_6			DB	' characters long', CR, LF, EOS
 ; ------------------------------------------------------------------------------
 
 ; ===========================	End of Data Segment	 ===========================
 
 .code
-
-; ---------------------------	 UTIL.LIB Imports	 ---------------------------
-EXTRN PutDec: NEAR
-; ------------------------------------------------------------------------------
 
 start:
 main			PROC
@@ -104,62 +110,53 @@ PROMPT:
 	_PutStr passwordPrompt				; Ask for a password
 PW_GET_CHAR:
 	_GetCh	noEcho						; Get a character from stdin
-	sPutStr pw_placeholder				; And print '*' for feedback
 	
 	cmp al, CR							; Check if the enter key was pressed
-	JE  CHECKPW
+	je  CHECKPW
 	cmp al, LF
-	JE  CHECKPW
-	
-	inc totalCount
+	je  CHECKPW
 	
 	; Start checking for character sets
-	cmp al, NUMERIC_LOWER				; If the character is less than a number
-	JNAE CMP_SPECIAL					; It can only be a special character
-	cmp al, NUMERIC_UPPER				; If the character is greater than a number
-	JNBE CMP_UPPER						; Check upper-case next
-	inc	numberCount
-	jmp PW_GET_CHAR
+	_CheckChar NUMERIC_LOWER, NUMERIC_UPPER, numberCount, CMP_SPECIAL, CMP_UPPER, CHAR_OK
+
 CMP_UPPER:
-	cmp al, UPPERCASE_LOWER				; If the character isn't a number and is less than 'A'
-	JNAE CMP_SPECIAL					; It must be a special character
-	cmp al, UPPERCASE_UPPER				; Otherwise, if its greater than 'Z'
-	JNBE CMP_LOWER						; It could be a lowercase or special character
-	inc upperCount
-	jmp PW_GET_CHAR
+	_CheckChar UPPERCASE_LOWER, UPPERCASE_UPPER, upperCount, CMP_SPECIAL, CMP_LOWER, CHAR_OK
+
 CMP_LOWER:
-	cmp al, LOWERCASE_LOWER				; If it's still not a lower case letter
-	JNAE CMP_SPECIAL					; Then it must be a special character
-	cmp al, LOWERCASE_UPPER
-	JNBE CMP_SPECIAL
-	inc lowerCount
-	jmp PW_GET_CHAR
+	_CheckChar LOWERCASE_LOWER, LOWERCASE_UPPER, lowerCount, CMP_SPECIAL, CMP_SPECIAL, CHAR_OK
+
 CMP_SPECIAL:
+	_CheckChar SPECIAL_1_LOWER, SPECIAL_1_UPPER, specialCount, CMP_SPECIAL_2, CMP_SPECIAL_2, CHAR_OK
+
+CMP_SPECIAL_2:
+	_CheckChar SPECIAL_2_LOWER, SPECIAL_2_UPPER, specialCount, CMP_SPECIAL_3, CMP_SPECIAL_3, CHAR_OK
+
+CMP_SPECIAL_3:
+	_CheckChar SPECIAL_3_LOWER, SPECIAL_3_UPPER, specialCount, CMP_SPECIAL_4, CMP_SPECIAL_4, CHAR_OK
+
+CMP_SPECIAL_4:
+	_CheckChar SPECIAL_4_LOWER, SPECIAL_4_UPPER, specialCount, CMP_SPECIAL_EXT, CMP_SPECIAL_EXT, CHAR_OK
+
+CMP_SPECIAL_EXT:
+	cmp al, SPECIAL_EXTRA
+	jnae PW_GET_CHAR
 	inc specialCount
-	jmp PW_GET_CHAR						; Prompt for the next character
+
+CHAR_OK:
+	inc totalCount						; Increment the total character count
+	_PutStr pw_placeholder				; Print '*' for feedback
+	jmp PW_GET_CHAR
 
 CHECKPW:
 	_PutStr blank
 
-	cmp numberCount, 0
-	jne CHECKPW_LOWER
-	_PutStr missing_number
-	inc validationErrors
+	_AssertOne numberCount, CHECKPW_LOWER, missing_number, validationErrors
 CHECKPW_LOWER:
-	cmp lowerCount, 0
-	jne CHECKPW_UPPER
-	_PutStr missing_lower
-	inc validationErrors
+	_AssertOne lowerCount, CHECKPW_UPPER, missing_lower, validationErrors
 CHECKPW_UPPER:
-	cmp upperCount, 0
-	jne CHECKPW_SPECIAL
-	_PutStr missing_upper
-	inc validationErrors
+	_AssertOne upperCount, CHECKPW_SPECIAL, missing_upper, validationErrors
 CHECKPW_SPECIAL:
-	cmp specialCount, 0
-	jne CHECKPW_MIN
-	_PutStr missing_special
-	inc validationErrors
+	_AssertOne specialCount, CHECKPW_MIN, missing_special, validationErrors
 CHECKPW_MIN:
 	cmp totalCount, MIN_LENGTH
 	jge CHECKPW_MAX
@@ -172,29 +169,6 @@ CHECKPW_MAX:
 	inc validationErrors
 
 STATUS:
-	_PutStr blank
-	_PutStr debug_1
-	mov ax, numberCount
-	call PutDec
-	
-	_PutStr debug_2
-	mov ax, lowerCount
-	call PutDec
-	
-	_PutStr debug_3
-	mov ax, upperCount
-	call PutDec
-	
-	_PutStr debug_4
-	mov ax, specialCount
-	call PutDec
-	
-	_PutStr debug_5
-	mov ax, totalCount
-	call PutDec
-	
-	_PutStr debug_6
-
 	_PutStr blank
 	cmp validationErrors, 0
 	jne CONTINUE_PROMPT
@@ -212,7 +186,7 @@ CONTINUE_PROMPT:
 	mov specialCount, 0000h
 	mov validationErrors, 0000h
 	
-	OR al, ASCII_TO_LOWER_MASK			; Convert the read character to lower case
+	or al, ASCII_TO_LOWER_MASK			; Convert the read character to lower case
 	cmp al, 'y'
 	je PROMPT
 	cmp al, 'n'
