@@ -89,7 +89,7 @@ policy_4        DB  TAB, '* Numbers (0-9)', CR, LF, EOS
 policy_5        DB  TAB, '* Special Characters', CR, LF, EOS
 pw_placeholder  DB  '*', EOS
 pw_ok           DB  'Nice password! Everything checks out', CR, LF, EOS
-missing_number  DB  'At least one letter is required', CR, LF, EOS
+missing_number  DB  'At least one number is required', CR, LF, EOS
 missing_lower   DB  'At least one lower case character is required', CR, LF, EOS
 missing_upper   DB  'At least one upper case character is required', CR, LF, EOS
 missing_special DB  'At least one special character is required', CR, LF, EOS
