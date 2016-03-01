@@ -11,12 +11,12 @@
 ; If not, and it is below <lower>, jump to <nextLower>
 ; If not, and it is above <upper>, jump to <nextUpper>
 _CheckChar MACRO lower, upper, counter, nextLower, nextUpper, ok
-    CMP  al, lower
-    JNAE nextLower
-    CMP  al, upper
-    JNBE nextUpper
-    INC  counter
-    JMP  ok
+    cmp  al, lower
+    jnae nextLower
+    cmp  al, upper
+    jnbe nextUpper
+    inc  counter
+    jmp  ok
 ENDM
 
 ; Checks to see if <counter> is greater than zero, and if so, jump to <nextOk>
