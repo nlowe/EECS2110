@@ -6,7 +6,7 @@
 ;   1:   Find the index of the first occurrence of a user-input character in the string
 ;   2:   Find the number of occurrences of a certain letter in a string
 ;   3:   Find the length of the input string.
-;   4:   Find the number of alphanumeric characters of the input string.
+;   4:   Find the number of alphanumeric characters of the input string, incl. space
 ;   5:   Write a routine that replaces every occurrence of a certain letter with another symbol
 ;   6:   Capitalize the letters in the string
 ;   7:   Make each letter lower case
@@ -21,6 +21,7 @@
 ; ==============================================================================
 include ..\lib\pcmac.inc
 include .\utils.inc
+include .\functions.inc
 
 ; ==============================================================================
 ; | Constants used in this file                                                |
@@ -55,15 +56,16 @@ padding         DB  '$'
 .code
 
 EXTRN GetDec:NEAR
+EXTRN PutDec:NEAR
 
 
 start:
 main            PROC
     _LdSeg  ds, @data               ; Load the data segment
-    
+
 PROMPT:
     _PutStr newStringPrompt
-    
+
     xor     bx, bx                  ; Clear bx
 PROMPT_CONTINUE:
     _GetCh  noecho
@@ -71,18 +73,18 @@ PROMPT_CONTINUE:
     je      MENU
     cmp     al, LF
     je      MENU
-    
+
     cmp     al, 1Fh
     jle     PROMPT_CONTINUE
     cmp     al, 7Fh
     jge     PROMPT_CONTINUE
-    
+
     mov     input_buffer[bx], al    ; Store the character in the buffer
     inc     bx
-    
+
     mov     dl, al                  ; Echo it out to the screen
     _PutCh
-    
+
     cmp     bx, MAX_LENGTH
     je      MENU
     jmp     PROMPT_CONTINUE
@@ -97,75 +99,108 @@ MENU_PROMPT:
     _PutStr blank
     _PutStr functionPrompt
     call    GetDec
-    
-    cmp     ax, 1
-    jne     CHECK_F2
-    ; TODO: Call Function 1
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+
+    cmp      ax, 1
+    jne      CHECK_F2
+    _PutStr  charFindPrompt
+    _GetCh
+    sPutStr  blank
+    _IndexOf input_buffer, al  ; The index is now in dx
+    cmp      dx, 0
+    jl       F1_NOT_FOUND
+    sPutStr  f1_1
+    sPutCh   al
+    sPutStr  f1_2
+    call     PutDec
+    jmp      MENU_PROMPT
+F1_NOT_FOUND:
+    _PutStr  f1_notFound
+    jmp      MENU_PROMPT
+
 CHECK_F2:
-    cmp     ax, 2
-    jne     CHECK_F3
-    ;TODO:  Call Function 2
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+    cmp      ax, 2
+    jne      CHECK_F3
+    _PutStr  charFindPrompt
+    _GetCh
+    sPutStr  blank
+    _Count   input_buffer, al
+    sPutStr  f2_1
+    sPutCh   al
+    sPutStr  f2_2
+    call     PutDec
+    _PutStr  f2_3
+    jmp      MENU_PROMPT
+
 CHECK_F3:
     cmp     ax, 3
     jne     CHECK_F4
-    ;TODO:  Call Function 3
-    _PutStr notImplemented
+    _PutStr f3_1
+    _StrLen input_buffer
+    call    PutDec
+    _PutStr f3_2
     jmp     MENU_PROMPT
-    
+
 CHECK_F4:
-    cmp     ax, 4
-    jne     CHECK_F5
-    ;TODO:  Call Function 4
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+    cmp          ax, 4
+    jne          CHECK_F5
+    _PutStr      f4_1
+    _StrAlphaLen input_buffer
+    call         PutDec
+    _PutStr      f4_2
+    jmp          MENU_PROMPT
+
 CHECK_F5:
-    cmp     ax, 5
-    jne     CHECK_F6
-    ;TODO:  Call Function 5
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+    cmp         ax, 5
+    jne         CHECK_F6
+    _PutStr     charFindPrompt
+    _GetCh
+    sPutStr     blank
+    mov         dl, al
+    _PutStr     charReplacePrompt
+    _StrRepalce input_buffer, dl, al
+
+    sPutStr     f5_1
+    sPutCh      dl
+    sPutStr     f5_2
+    sPutCh      al
+    _PutStr     f5_3
+
+    jmp         MENU_PROMPT
+
 CHECK_F6:
-    cmp     ax, 6
-    jne     CHECK_F7
-    ;TODO:  Call Function 6
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+    cmp         ax, 6
+    jne         CHECK_F7
+    _StrToUpper input_buffer
+    _PutStr     f6_1
+    jmp         MENU_PROMPT
+
 CHECK_F7:
-    cmp     ax, 7
-    jne     CHECK_F8
-    ;TODO:  Call Function 7
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+    cmp         ax, 7
+    jne         CHECK_F8
+    _StrToLower input_buffer
+    _PutStr     f7_1
+    jmp         MENU_PROMPT
+
 CHECK_F8:
-    cmp     ax, 8
-    jne     CHECK_F9
-    ;TODO:  Call Function 8
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
-    
+    cmp        ax, 8
+    jne        CHECK_F9
+    _StrToggle input_buffer
+    _PutStr    f8_1
+    jmp        MENU_PROMPT
+
 CHECK_F9:
     cmp     ax, 9
     jne     CHECK_F10
     ; TODO: Don't forget to either clear out the end string or append a '$'
     jmp     PROMPT              ; Function 9: Prompt for a new string
-    
+
 CHECK_F10:
     cmp     ax, 10
     jne     CHECK_F0
-    ;TODO:  Call Function 100
+    ;TODO:  Call Function 10
     _PutStr notImplemented
     jmp     MENU_PROMPT
-    
+
 CHECK_F0:
     cmp     ax, 0
     jne     MENU            ; This will also catch F100 (print the menu)

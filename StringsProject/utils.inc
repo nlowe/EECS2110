@@ -17,4 +17,8 @@ _CharToUpper    MACRO   reg
     AND reg, ASCII_TO_UPPER_MASK
 ENDM
 
+_CharToggleCase MACRO   reg
+    XOR reg, ASCII_TO_LOWER_MASK
+ENDM
+
 .LIST
