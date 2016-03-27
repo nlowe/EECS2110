@@ -46,34 +46,131 @@ RET_OK              EQU 00h         ; Return code for OK
 include .\strings.inc
 
 ; ---------------------------       Variables        ---------------------------
-input_buffer    DB  50 '$'
+input_buffer    DB  50 DUP('$')
+padding         DB  '$'
 ; ------------------------------------------------------------------------------
 
 ; ===========================   End of Data Segment  ===========================
 
 .code
 
+EXTRN GetDec:NEAR
+
+
 start:
 main            PROC
     _LdSeg  ds, @data               ; Load the data segment
-    _PutStr newStringPrompt
-    _PutStr blank
+    
 PROMPT:
+    _PutStr newStringPrompt
     
-
-CONTINUE_PROMPT:
-    _PutStr      continuePrompt              ; Prompt the user to continue or exit
-    _GetCh
-    sPutStr      blank
-
+    xor     bx, bx                  ; Clear bx
+PROMPT_CONTINUE:
+    _GetCh  noecho
+    cmp     al, CR
+    je      MENU
+    cmp     al, LF
+    je      MENU
     
-    _CharToLower al                          ; Convert the read character to lower case
-    cmp          al, 'y'
-    je           PROMPT                      ; The user entered 'y', prompt for another PW
-    cmp          al, 'n'
-    je           EXIT                        ; The user entered 'n', exit
-    _PutStr      continueInvalidPrompt       ; /snark
-    jmp          CONTINUE_PROMPT             ; ask again...
+    cmp     al, 1Fh
+    jle     PROMPT_CONTINUE
+    cmp     al, 7Fh
+    jge     PROMPT_CONTINUE
+    
+    mov     input_buffer[bx], al    ; Store the character in the buffer
+    inc     bx
+    
+    mov     dl, al                  ; Echo it out to the screen
+    _PutCh
+    
+    cmp     bx, MAX_LENGTH
+    je      MENU
+    jmp     PROMPT_CONTINUE
+
+MENU:
+    _PutStr blank
+    _PutStr functionMenu
+
+MENU_PROMPT:
+    _PutStr currentString
+    _PutStr input_buffer
+    _PutStr blank
+    _PutStr functionPrompt
+    call    GetDec
+    
+    cmp     ax, 1
+    jne     CHECK_F2
+    ; TODO: Call Function 1
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F2:
+    cmp     ax, 2
+    jne     CHECK_F3
+    ;TODO:  Call Function 2
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F3:
+    cmp     ax, 3
+    jne     CHECK_F4
+    ;TODO:  Call Function 3
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F4:
+    cmp     ax, 4
+    jne     CHECK_F5
+    ;TODO:  Call Function 4
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F5:
+    cmp     ax, 5
+    jne     CHECK_F6
+    ;TODO:  Call Function 5
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F6:
+    cmp     ax, 6
+    jne     CHECK_F7
+    ;TODO:  Call Function 6
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F7:
+    cmp     ax, 7
+    jne     CHECK_F8
+    ;TODO:  Call Function 7
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F8:
+    cmp     ax, 8
+    jne     CHECK_F9
+    ;TODO:  Call Function 8
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F9:
+    cmp     ax, 9
+    jne     CHECK_F10
+    ; TODO: Don't forget to either clear out the end string or append a '$'
+    jmp     PROMPT              ; Function 9: Prompt for a new string
+    
+CHECK_F10:
+    cmp     ax, 10
+    jne     CHECK_F0
+    ;TODO:  Call Function 100
+    _PutStr notImplemented
+    jmp     MENU_PROMPT
+    
+CHECK_F0:
+    cmp     ax, 0
+    jne     MENU            ; This will also catch F100 (print the menu)
+
+    ; Function 0 is just to exit
 EXIT:
     _Exit   RET_OK
 main            ENDP

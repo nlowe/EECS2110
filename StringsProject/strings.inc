@@ -8,24 +8,23 @@
 
 ; ---------------------------    Input Prompt Strings    ---------------------------
 newStringPrompt         DB  'Enter a new string> ', EOS
-continuePrompt          DB  'Continue? [y/n] ', EOS
-continueInvalidPrompt   DB  'Project specification dictates you enter either one of (Y,y,N,n), so I will ask again. ', EOS
+functionPrompt          DB  'Enter a function number> ', EOS
 ; ----------------------------------------------------------------------------------
 
 ; ---------------------------  String Function Messages  ---------------------------
-functionMenu    DB  'Supported Functions: ', CR, LF,
-                    TAB, '1:   Find the index of the first occurrence of a character', CR, LF,
-                    TAB, '2:   Find the number of occurrences of a certain character', CR, LF,
-                    TAB, '3:   Find the length of the string', CR, LF,
-                    TAB, '4:   Find the number of alphanumeric characters of the string', CR, LF,
-                    TAB, '5:   Replaces every occurrence of a certain letter with another symbol', CR, LF,
-                    TAB, '6:   Capitalize the letters in the string', CR, LF,
-                    TAB, '7:   Make each letter lower case', CR, LF,
-                    TAB, '8:   Toggle the case of each letter', CR, LF,
-                    TAB, '9:   Input a new string', CR, LF,
-                    TAB, '10:  Undo the last action that modified the string', CR, LF,
-                    TAB, '100: Output the menu', CR, LF,
-                    TAB, '0:   Exit the program', CR, LF, EOS
+functionMenu    DB  'Supported Functions: ', CR, LF
+                DB  TAB, '1:   Find the index of the first occurrence of a character', CR, LF
+                DB  TAB, '2:   Find the number of occurrences of a certain character', CR, LF
+                DB  TAB, '3:   Find the length of the string', CR, LF
+                DB  TAB, '4:   Find the number of alphanumeric characters of the string', CR, LF
+                DB  TAB, '5:   Replaces every occurrence of a certain letter with another symbol', CR, LF
+                DB  TAB, '6:   Capitalize the letters in the string', CR, LF
+                DB  TAB, '7:   Make each letter lower case', CR, LF
+                DB  TAB, '8:   Toggle the case of each letter', CR, LF
+                DB  TAB, '9:   Input a new string', CR, LF
+                DB  TAB, '10:  Undo the last action that modified the string', CR, LF
+                DB  TAB, '100: Output the menu', CR, LF
+                DB  TAB, '0:   Exit the program', CR, LF, CR, LF, EOS
 
 f1_1            DB  'The first index of "', EOS
 f1_2            DB  '" is at position ', EOS
@@ -52,8 +51,10 @@ f8_1            DB  'The casing of the string has been toggled', CR, LF, EOS
 ; ----------------------------------------------------------------------------------
                             
 ; ---------------------------       Output Message       ---------------------------
+currentString    DB  'The current string is:', CR, LF, EOS
 undoNotAvailable DB  'Undo function not available (no actions to undo)', CR, LF, EOS
 undoSuccess      DB  'Undo successful. The string is now: ', EOS
+notImplemented   DB  'Not Implemented Yet', CR, LF, EOS
 blank            DB  CR, LF, EOS
 ; ----------------------------------------------------------------------------------
 
