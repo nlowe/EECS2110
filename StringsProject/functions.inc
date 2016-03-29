@@ -6,21 +6,25 @@
 ;; EECS 2110 - Computer Architecture and Organization
 ;; Spring 2016 at the University of Toledo
 
-; Find the index of the first occurrence of c in the string s, result in dx, -1 if not found
-_IndexOf    MACRO   s, c
-    mov     dx, -2
-    mov     bx, 0
-_INDEX_OF_LOOP0:
-    cmp     s[bx], '$'
-    je      _INDEX_OF_LOOP0_DONE
+; Find the index of the first occurrence of c in the string s of length len, result in dx, -1 if not found
+_IndexOf    MACRO   s, c, len
+    cmp     len, 0                  ; Check to see if we were passed a 0 length string
+    je      _INDEX_OF_LOOP0_DONE_NOT_FOUND
 
-    inc     dx
-    cmp     s[bx], c
-    je      _INDEX_OF_LOOP0_DONE
+    mov     bx, -1
+_INDEX_OF_LOOP0:
     inc     bx
-    jmp     _INDEX_OF_LOOP0
+
+    cmp     bl, len
+    je      _INDEX_OF_LOOP0_DONE_NOT_FOUND
+    cmp     s[bx], c
+    jne     _INDEX_OF_LOOP0
+    
+    mov     dx, bx
+    jmp     _INDEX_OF_LOOP0_DONE
+_INDEX_OF_LOOP0_DONE_NOT_FOUND:
+    mov     dx, -1
 _INDEX_OF_LOOP0_DONE:
-    inc     dx
 ENDM
 
 ; Find the number of occurrences of a character c in s, result in dx
