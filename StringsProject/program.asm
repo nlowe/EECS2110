@@ -48,10 +48,10 @@ include .\strings.inc
 
 ; ---------------------------       Variables        ---------------------------
 ; input_buffer    STRBUF <>
-input_buffer    DB  80
+input_buffer    DB  51
 input_length    DB  ?
 input_string    DB  50 DUP('$')
-padding         DB  '$'
+padding         DB  4  DUP('$')
 ; ------------------------------------------------------------------------------
 
 ; ===========================   End of Data Segment  ===========================
@@ -75,11 +75,11 @@ MENU:
     _PutStr functionMenu
 
 MENU_PROMPT:
-    _PutStr currentString
-    _PutStr input_string
-    _PutStr blank
-    _PutStr functionPrompt
-    call    GetDec
+    _PutStr     currentString
+    _SafePutStr input_string, input_length
+    _PutStr     blank
+    _PutStr     functionPrompt
+    call        GetDec
 
 ; 1:   Find the index of the first occurrence of a user-input character in the string
 CHECK_F1:
@@ -127,7 +127,7 @@ CHECK_F3:
     jne     CHECK_F4
 
     _PutStr f3_1
-    xor     ah, ah
+    xor     ax, ax
     mov     al, input_length
     call    PutDec
     _PutStr f3_2

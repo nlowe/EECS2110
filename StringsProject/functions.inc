@@ -143,4 +143,17 @@ _NotAlphaNumChar MACRO c, lblTrue
 _NOT_ALPHANUM_END:
 ENDM
 
+; Print the specified string of length len to stdout, including the '$' character
+_SafePutStr MACRO s, len
+    mov    bx, -1
+_SAFE_PUTSTR_LOOP0:
+    inc    bx
+    cmp    bl, len
+    je     _SAFE_PUTSTR_LOOP0_DONE
+
+    _PutCh s[bx]
+    jmp    _SAFE_PUTSTR_LOOP0
+_SAFE_PUTSTR_LOOP0_DONE:
+ENDM
+
 .LIST
