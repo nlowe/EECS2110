@@ -20,7 +20,6 @@
 ; | Include libraries and macros                                               |
 ; ==============================================================================
 include ..\lib\pcmac.inc
-include .\utils.inc
 include .\functions.inc
 
 ; ==============================================================================
@@ -173,7 +172,7 @@ CHECK_F6:
     cmp         ax, 6
     jne         CHECK_F7
 
-    _StrToUpper input_string
+    _StrToUpper input_string, input_length
     _PutStr     f6_1
     jmp         MENU_PROMPT
 
@@ -182,7 +181,7 @@ CHECK_F7:
     cmp         ax, 7
     jne         CHECK_F8
 
-    _StrToLower input_string
+    _StrToLower input_string, input_length
     _PutStr     f7_1
     jmp         MENU_PROMPT
 
@@ -191,7 +190,7 @@ CHECK_F8:
     cmp        ax, 8
     jne        CHECK_F9
 
-    _StrToggle input_string
+    _StrToggle input_string, input_length
     _PutStr    f8_1
     jmp        MENU_PROMPT
 
