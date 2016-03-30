@@ -112,7 +112,7 @@ CHECK_F2:
     _GetCh
 
     sPutStr  blank
-    _Count   input_string, al
+    _Count   input_string, al, input_length
     sPutStr  f2_1
     sPutCh   al
     sPutStr  f2_2
@@ -127,8 +127,8 @@ CHECK_F3:
     jne     CHECK_F4
 
     _PutStr f3_1
-    xor     dh, dh
-    mov     dl, input_length
+    xor     ah, ah
+    mov     al, input_length
     call    PutDec
     _PutStr f3_2
     jmp     MENU_PROMPT
@@ -139,7 +139,7 @@ CHECK_F4:
     jne          CHECK_F5
 
     _PutStr      f4_1
-    _StrAlphaLen input_string
+    _StrAlphaLen input_string, input_length
     call         PutDec
     _PutStr      f4_2
     jmp          MENU_PROMPT
@@ -153,9 +153,12 @@ CHECK_F5:
     _PutStr     charFindPrompt
     _GetCh
     sPutStr     blank
-    mov         dl, al
-    _PutStr     charReplacePrompt
-    _StrRepalce input_string, dl, al
+    mov         dx, ax
+    sPutStr     charReplacePrompt
+    _GetCh
+    sPutStr     blank
+
+    _StrRepalce input_string, input_length, dl, al
 
     sPutStr     f5_1
     sPutCh      dl
