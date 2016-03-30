@@ -46,11 +46,12 @@ RET_OK              EQU 00h         ; Return code for OK
 include .\strings.inc
 
 ; ---------------------------       Variables        ---------------------------
-; input_buffer    STRBUF <>
 input_buffer    DB  51
 input_length    DB  ?
-input_string    DB  50 DUP('$')
-padding         DB  4  DUP('$')
+input_string    DB  51 DUP('$')
+undo_length     DB  ?
+undo_buffer     DB  51 DUP('$')
+tmp_swap        DB  51 DUP('$')
 ; ------------------------------------------------------------------------------
 
 ; ===========================   End of Data Segment  ===========================
@@ -76,6 +77,9 @@ MENU:
 MENU_PROMPT:
     _PutStr     currentString
     _SafePutStr input_string, input_length
+    _PutStr     blank
+    _PutStr     undoString
+    _SafePutStr undo_buffer,  undo_length
     _PutStr     blank
     _PutStr     functionPrompt
     call        GetDec
@@ -157,6 +161,8 @@ CHECK_F5:
     _GetCh
     sPutStr     blank
 
+    _StrCpy   input_string, undo_buffer, input_length, undo_length
+
     _StrRepalce input_string, input_length, dl, al
 
     sPutStr     f5_1
@@ -172,6 +178,7 @@ CHECK_F6:
     cmp         ax, 6
     jne         CHECK_F7
 
+    _StrCpy   input_string, undo_buffer, input_length, undo_length
     _StrToUpper input_string, input_length
     _PutStr     f6_1
     jmp         MENU_PROMPT
@@ -181,6 +188,7 @@ CHECK_F7:
     cmp         ax, 7
     jne         CHECK_F8
 
+    _StrCpy   input_string, undo_buffer, input_length, undo_length
     _StrToLower input_string, input_length
     _PutStr     f7_1
     jmp         MENU_PROMPT
@@ -190,6 +198,7 @@ CHECK_F8:
     cmp        ax, 8
     jne        CHECK_F9
 
+    _StrCpy   input_string, undo_buffer, input_length, undo_length
     _StrToggle input_string, input_length
     _PutStr    f8_1
     jmp        MENU_PROMPT
@@ -199,17 +208,17 @@ CHECK_F9:
     cmp     ax, 9
     jne     CHECK_F10
 
-    ; TODO: Don't forget to either clear out the end string or append a '$'
-    jmp     PROMPT              ; Function 9: Prompt for a new string
+    _StrCpy input_string, undo_buffer, input_length, undo_length
+    jmp     PROMPT
 
 ; 10:  undo the last action that modified the string
 CHECK_F10:
-    cmp     ax, 10
-    jne     CHECK_F0
+    cmp      ax, 10
+    jne      CHECK_F0
 
-    ;TODO:  Call Function 10
-    _PutStr notImplemented
-    jmp     MENU_PROMPT
+    ; Simply swap the input and undo buffers, using the temp buffer
+    _StrSwap input_string, undo_buffer, tmp_swap, input_length, undo_length
+    jmp      MENU_PROMPT
 
 ; 0:   exit the program
 CHECK_F0:
