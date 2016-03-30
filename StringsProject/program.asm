@@ -161,8 +161,7 @@ CHECK_F5:
     _GetCh
     sPutStr     blank
 
-    _StrCpy   input_string, undo_buffer, input_length, undo_length
-
+    _StrCpy     input_string, undo_buffer, input_length, undo_length
     _StrRepalce input_string, input_length, dl, al
 
     sPutStr     f5_1

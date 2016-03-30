@@ -202,7 +202,7 @@ ENDM
 
 ; Copy string a to b. Both strings must be length len
 _StrCpy MACRO   src, dst, slen, dlen
-    _SvRegs ds, es
+    _SvRegs <ax, ds, es>
     _LdSeg  ds, @data
     _LdSeg  es, @data
     cld
@@ -212,11 +212,11 @@ _StrCpy MACRO   src, dst, slen, dlen
     mov     cl, slen
     mov     dlen, cl
     rep     movsb
-    _RsRegs es, ds
+    _RsRegs <es, ds, ax>
 ENDM
 
 _StrSwap MACRO  a, b, tmp, alen, blen
-    _SvRegs ax, bx
+    _SvRegs <ax, bx>
     mov     bh, alen
     mov     bl, blen
 
@@ -230,7 +230,7 @@ _StrSwap MACRO  a, b, tmp, alen, blen
     ; Swap the lengths in case they're different
     mov     alen, bl
     mov     blen, bh
-    _RsRegs bx, ax
+    _RsRegs <bx, ax>
 ENDM
 
 .LIST
