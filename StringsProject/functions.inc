@@ -134,23 +134,30 @@ _STR_TOGGLE_LOOP0_DONE:
     nop
 ENDM
 
+_NotAlphaChar MACRO c, lblTrue
+    LOCAL _NOT_ALPHACHAR_END
+    cmp   c, UPPERCASE_START
+    JNAE  lblTrue
+    cmp   c, UPPERCASE_END
+    JBE   _NOT_ALPHACHAR_END
+    cmp   c, LOWERCASE_START
+    JNAE  lblTrue
+    cmp   c, LOWERCASE_END
+    JNBE  lblTrue
+_NOT_ALPHACHAR_END:
+    nop
+ENDM
+
 ; Jump to lblTrue if the specified character is not an alphanumeric character or space
 _NotAlphaNumChar MACRO c, lblTrue
     LOCAL _NOT_ALPHANUM_END
-    cmp  c, ' '
-    je   _NOT_ALPHANUM_END
-    cmp  c, NUMERIC_START
-    JNAE lblTrue
-    cmp  c, NUMERIC_END
-    JBE  _NOT_ALPHANUM_END
-    cmp  c, UPPERCASE_START
-    JNAE lblTrue
-    cmp  c, UPPERCASE_END
-    JBE  _NOT_ALPHANUM_END
-    cmp  c, LOWERCASE_START
-    JNAE lblTrue
-    cmp  c, LOWERCASE_END
-    JNBE lblTrue
+    cmp           c, ' '
+    je            _NOT_ALPHANUM_END
+    cmp           c, NUMERIC_START
+    JNAE          lblTrue
+    cmp           c, NUMERIC_END
+    JBE           _NOT_ALPHANUM_END
+    _NotAlphaChar c, lblTrue
 _NOT_ALPHANUM_END:
     nop
 ENDM
@@ -193,9 +200,9 @@ _CHAR_TO_UPPER_DONE:
 ENDM
 
 _CharToggleCase MACRO   reg
-    LOCAL            _CHAR_TOGGLE_DONE
-    _NotAlphaNumChar reg, _CHAR_TOGGLE_DONE
-    xor              reg, ASCII_TO_LOWER_MASK
+    LOCAL         _CHAR_TOGGLE_DONE
+    _NotAlphaChar reg, _CHAR_TOGGLE_DONE
+    xor           reg, ASCII_TO_LOWER_MASK
 _CHAR_TOGGLE_DONE:
     nop
 ENDM
