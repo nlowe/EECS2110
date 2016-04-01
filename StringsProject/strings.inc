@@ -55,7 +55,6 @@ f8_1            DB  'The casing of the string has been toggled', CR, LF, EOS
 
 ; ---------------------------       Output Message       ---------------------------
 currentString    DB  'The current string is:', CR, LF, EOS
-undoString       DB  'The undo buffer is:', CR, LF, EOS
 undoNotAvailable DB  'Undo function not available (no actions to undo)', CR, LF, EOS
 undoSuccess      DB  'Undo successful. The string is now: ', EOS
 notImplemented   DB  'Not Implemented Yet', CR, LF, EOS

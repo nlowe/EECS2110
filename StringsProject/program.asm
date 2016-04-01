@@ -76,9 +76,6 @@ MENU_PROMPT:
     _PutStr     currentString
     _SafePutStr input_string, input_length
     _PutStr     blank
-    _PutStr     undoString
-    _SafePutStr undo_buffer,  undo_length
-    _PutStr     blank
     _PutStr     functionPrompt
     _SafeGetDec
 
