@@ -177,6 +177,42 @@ _SAFE_PUTSTR_LOOP0_DONE:
     nop
 ENDM
 
+; GetDec from Util.lib does not indicate invalid input
+; This function returns a positive number from stdin or -1 if no number was entered
+_SafeGetDec MACRO
+    LOCAL   _SAFE_GETDEC_LOOP0, _SAFE_GETDEC_LOOP0_DONE, _SAFE_GETDEC_BLANK
+    LOCAL   _SAFE_GETDEC_RET
+    _SvRegs <cx, bx>
+    xor     bx, bx
+    xor     cx, cx
+_SAFE_GETDEC_LOOP0:
+    _GetCh
+    cmp     al, NUMERIC_START
+    JNAE    _SAFE_GETDEC_LOOP0_DONE
+    cmp     al, NUMERIC_END
+    JNBE    _SAFE_GETDEC_LOOP0_DONE
+    or      cx, -1                      ; Remember if we saw at least one digit
+    sub     al, 30h                     ; De-ASCII-tize
+    cbw
+    add     bx, ax                      ; Add it to the running total
+    mov     ax, bx                      ; And shift left by one power of 10
+    mov     bx, 10
+    mul     bx
+    mov     bx, ax
+    jmp     _SAFE_GETDEC_LOOP0
+_SAFE_GETDEC_LOOP0_DONE:
+    jcxz    _SAFE_GETDEC_BLANK          ; If we didn't see any digits, return -1
+    mov     ax, bx                      ; Shift back right by one power of 10
+    mov     bx, 10
+    div     bx
+    cbw
+    jmp     _SAFE_GETDEC_RET
+_SAFE_GETDEC_BLANK:
+    mov     ax, -1
+_SAFE_GETDEC_RET:
+    _RsRegs <bx, cx>
+ENDM
+
 _CharToLower    MACRO   reg
     LOCAL _CHAR_TO_LOWER_DONE
     cmp   reg, 'A'

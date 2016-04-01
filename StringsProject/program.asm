@@ -58,9 +58,7 @@ tmp_swap        DB  51 DUP('$')
 
 .code
 
-EXTRN GetDec:NEAR
 EXTRN PutDec:NEAR
-
 
 start:
 main            PROC
@@ -82,7 +80,7 @@ MENU_PROMPT:
     _SafePutStr undo_buffer,  undo_length
     _PutStr     blank
     _PutStr     functionPrompt
-    call        GetDec
+    _SafeGetDec
 
 ; 1:   Find the index of the first occurrence of a user-input character in the string
 CHECK_F1:
