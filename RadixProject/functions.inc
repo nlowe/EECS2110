@@ -73,6 +73,44 @@ _INDEX_OF_LOOP0_DONE:
     nop
 ENDM
 
+_GetRadix MACRO outnum, radix, symbols, symbolLen, err_jmp_loc
+    LOCAL        _GET_RADIX_LOOP0, _GET_RADIX_LOOP0_DONE
+    LOCAL        _GET_RADIX_END, _GET_RADIX_HANDLE_NEG
+    xor          cx, cx                 ; The running total is kept in cx
+_GET_RADIX_LOOP0:
+    _GetCh
+    cmp          al, CR
+    je           _GET_RADIX_LOOP0_DONE
+    cmp          al, '-'
+    je           _GET_RADIX_HANDLE_NEG
+    _CharToUpper al
+    _IndexOf     symbols, al, symbolLen                ; Index in dx
+    cmp          dx, -1
+    je           err_jmp_loc
+    cmp          dl, radix
+    jge          err_jmp_loc
+    push         dx
+    mov          al, radix
+    cbw
+    xchg         ax, cx
+    xor          dx, dx
+    imul         cx
+    pop          dx
+    add          ax, dx
+    mov          cx, ax
+    jmp          _GET_RADIX_LOOP0
+_GET_RADIX_LOOP0_DONE:
+    mov          outnum, cx
+    jmp          _GET_RADIX_END
+_GET_RADIX_HANDLE_NEG:
+    cmp          cx, 0              ; The negative symbol must be the first
+    jne          err_jmp_loc        ; symbol to appear. If cx isn't zero, treat
+    mov          cx, -1             ; it as a bad symbol. Otherwise initialize
+    jmp          _GET_RADIX_LOOP0   ; the total to -1 and go get the next symbol
+_GET_RADIX_END:
+    nop
+ENDM
+
 ; We're lazy. Print num in the specified radix using the symbol table
 _PutRadix MACRO num, radix, symbols
     LOCAL _PUT_RADIX_LOOP0, _PUT_RADIX_LOOP1, _PUT_RADIX_LOOP1_DONE
@@ -108,40 +146,21 @@ _PUT_RADIX_LOOP1_DONE:
     nop
 ENDM
 
-; GetDec from Util.lib does not indicate invalid input
-; This function returns a positive number from stdin or -1 if no number was entered
-_SafeGetDec MACRO
-    LOCAL   _SAFE_GETDEC_LOOP0, _SAFE_GETDEC_LOOP0_DONE, _SAFE_GETDEC_BLANK
-    LOCAL   _SAFE_GETDEC_RET
-    _SvRegs <cx, bx>
-    xor     bx, bx
-    xor     cx, cx
-_SAFE_GETDEC_LOOP0:
-    _GetCh
-    cmp     al, NUMERIC_START
-    JNAE    _SAFE_GETDEC_LOOP0_DONE
-    cmp     al, NUMERIC_END
-    JNBE    _SAFE_GETDEC_LOOP0_DONE
-    or      cx, -1                      ; Remember if we saw at least one digit
-    sub     al, 30h                     ; De-ASCII-tize
-    cbw
-    add     bx, ax                      ; Add it to the running total
-    mov     ax, bx                      ; And shift left by one power of 10
-    mov     bx, 10
-    mul     bx
-    mov     bx, ax
-    jmp     _SAFE_GETDEC_LOOP0
-_SAFE_GETDEC_LOOP0_DONE:
-    jcxz    _SAFE_GETDEC_BLANK          ; If we didn't see any digits, return -1
-    mov     ax, bx                      ; Shift back right by one power of 10
-    mov     bx, 10
-    div     bx
-    cbw
-    jmp     _SAFE_GETDEC_RET
-_SAFE_GETDEC_BLANK:
-    mov     ax, -1
-_SAFE_GETDEC_RET:
-    _RsRegs <bx, cx>
+_Pow MACRO a, x, res
+    LOCAL _POW_LOOP0, _POW_LOOP0_DONE
+    mov   cx, x
+    mov   bx, a
+    mov   res, bx
+_POW_LOOP0:
+    dec   cx
+    jcxz  _POW_LOOP0_DONE
+    xor   dx, dx
+    mov   ax, res
+    imul  bx
+    mov   res, ax
+    jmp   _POW_LOOP0
+_POW_LOOP0_DONE:
+    nop
 ENDM
 
 _CharToUpper    MACRO   reg

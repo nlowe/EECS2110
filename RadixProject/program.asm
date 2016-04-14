@@ -59,48 +59,80 @@ main            PROC
     _LdSeg  ds, @data               ; Load the data segment
 
 PROMPT:
-    _PutStr inputRadixPrompt
+    _PutStr    inputRadixPrompt
     _PickRadix inputRadix, EXIT, INVALID_RADIX
-    _PutStr blank
+    _PutStr    blank
 
-    _PutStr outputRadixPrompt
+    _PutStr    outputRadixPrompt
     _PickRadix outputRadix, EXIT, INVALID_RADIX
-    _PutStr blank
+    _PutStr    blank
 
-    _PutStr debug_1
-    _PutRadix 1234, 16, radixTable
-    _PutStr blank
+    _PutStr   numberPrompt_A
+    _GetRadix inputA, inputRadix, radixTable, radixTableLength, INVALID_RADIX_SYMBOL
 
-    _PutStr debug_2
-    _PutRadix -1234, 16, radixTable
-    _PutStr blank
+    _PutStr   numberPrompt_B
+    _GetRadix inputB, inputRadix, radixTable, radixTableLength, INVALID_RADIX_SYMBOL
 
-    _PutStr numberPrompt_A
-    ; TODO: Get number A
+    _PutStr   debug_1
+    _PutRadix inputA, 16, radixTable
+    _PutStr   blank
 
-    _PutStr numberPrompt_B
-    ; TODO: Get number B
+    _PutStr   debug_2
+    _PutRadix inputB, 16, radixTable
+    _PutStr   blank
 
-    _PutStr outAdd
-    ; TODO: Add
+    _PutStr   outAdd
+    mov       ax, inputA
+    mov       mathscratch, ax
+    mov       bx, inputB
+    add       mathscratch, bx
+    _PutRadix mathscratch, outputRadix, radixTable
+    _PutStr   blank
 
-    _PutStr outSub
-    ; TODO: sub
+    _PutStr   outSub
+    mov       ax, inputA
+    mov       mathscratch, ax
+    mov       bx, inputB
+    sub       mathscratch, bx
+    _PutRadix mathscratch, outputRadix, radixTable
+    _PutStr   blank
 
-    _PutStr outMul
-    ; TODO: mul
+    _PutStr   outMul
+    xor       dx, dx
+    mov       ax, inputA
+    imul      inputB
+    mov       mathscratch, ax
+    _PutRadix mathscratch, outputRadix, radixTable
+    _PutStr   blank
 
-    _PutStr outDiv
-    ; TODO: div
+    _PutStr   outDiv
+    xor       dx, dx
+    mov       ax, inputA
+    idiv      inputB
+    push      dx
+    mov       mathscratch, ax
+    _PutRadix mathscratch, outputRadix, radixTable
+    _PutStr   outRemainder
+    pop       dx
+    mov       mathscratch, dx
+    _PutRadix mathscratch, outputRadix, radixTable
+    _PutStr   blank
 
-    _PutStr outPow
-    ; TODO: pow
+    _PutStr   outPow
+    _Pow      inputA, inputB, mathscratch
+    _PutRadix mathscratch, outputRadix, radixTable
+    _PutStr   blank
 
     jmp     PROMPT
 
 INVALID_RADIX:
     _PutStr blank
     _PutStr errBadRadix
+    jmp     PROMPT
+
+INVALID_RADIX_SYMBOL:
+    _PutStr blank
+    _PutStr errBadSymbol
     jmp     PROMPT
 
 EXIT:
