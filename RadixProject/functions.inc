@@ -76,6 +76,8 @@ ENDM
 _GetRadix MACRO outnum, radix, symbols, symbolLen, err_jmp_loc
     LOCAL        _GET_RADIX_LOOP0, _GET_RADIX_LOOP0_DONE
     LOCAL        _GET_RADIX_END, _GET_RADIX_HANDLE_NEG
+    mov          cx, 1
+    push         cx
     xor          cx, cx                 ; The running total is kept in cx
 _GET_RADIX_LOOP0:
     _GetCh
@@ -100,13 +102,20 @@ _GET_RADIX_LOOP0:
     mov          cx, ax
     jmp          _GET_RADIX_LOOP0
 _GET_RADIX_LOOP0_DONE:
+    xor          dx, dx
+    pop          ax                 ; Pop the sign flag into ax
+    imul         cx
+    mov          cx, ax
     mov          outnum, cx
     jmp          _GET_RADIX_END
 _GET_RADIX_HANDLE_NEG:
     cmp          cx, 0              ; The negative symbol must be the first
     jne          err_jmp_loc        ; symbol to appear. If cx isn't zero, treat
-    mov          cx, -1             ; it as a bad symbol. Otherwise initialize
-    jmp          _GET_RADIX_LOOP0   ; the total to -1 and go get the next symbol
+    pop          cx                 ; it as a bad symbol. Read the sign flag from
+    mov          cx, -1             ; the stack and push a -1
+    push         cx
+    xor          cx, cx
+    jmp          _GET_RADIX_LOOP0
 _GET_RADIX_END:
     nop
 ENDM
