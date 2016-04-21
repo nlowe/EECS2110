@@ -7,8 +7,8 @@
 ;              A+B
 ;              A-B
 ;              A*B
-;              A/B
-;              A^B
+;              A/B if b != 0, otherwise display an error
+;              A^abs(b)
 
 ; ==============================================================================
 ; | Include libraries and macros                                               |
@@ -111,8 +111,8 @@ PROMPT:
     _PutStr   errDivByZero
     jmp       OUT_DIV_DONE
 OUT_DIV:
-    xor       dx, dx
     mov       ax, inputA
+    cwd
     idiv      inputB
     push      dx
     mov       mathscratch, ax
