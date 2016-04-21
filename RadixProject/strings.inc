@@ -29,6 +29,7 @@ debug_2          DB  'inputB in hex: ', EOS
 
 errBadRadix      DB  'Invalid Radix', CR, LF, EOS
 errBadSymbol     DB  'Invalid Symbol for input radix', CR, LF, EOS
+errDivByZero     DB  'The second number is 0, cannot divide', CR, LF, EOS
 
 notImplemented   DB  'Not Implemented Yet', CR, LF, EOS
 blank            DB  CR, LF, EOS

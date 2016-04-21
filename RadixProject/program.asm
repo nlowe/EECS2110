@@ -106,6 +106,11 @@ PROMPT:
     _PutStr   blank
 
     _PutStr   outDiv
+    cmp       inputB, 0
+    jne       OUT_DIV
+    _PutStr   errDivByZero
+    jmp       OUT_DIV_DONE
+OUT_DIV:
     xor       dx, dx
     mov       ax, inputA
     idiv      inputB
@@ -117,9 +122,14 @@ PROMPT:
     mov       mathscratch, dx
     _PutRadix mathscratch, outputRadix, radixTable
     _PutStr   blank
+OUT_DIV_DONE:
 
     _PutStr   outPow
-    _Pow      inputA, inputB, mathscratch
+    mov       ax, inputB
+    cwd                                 ; Fill dx with the sign bit of ax
+    xor       ax, dx                    ; And compute the absolute value
+    sub       ax, dx                    ; of inputB first
+    _Pow      inputA, ax, mathscratch
     _PutRadix mathscratch, outputRadix, radixTable
     _PutStr   blank
 

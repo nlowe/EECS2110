@@ -156,8 +156,9 @@ _PUT_RADIX_LOOP1_DONE:
 ENDM
 
 _Pow MACRO a, x, res
-    LOCAL _POW_LOOP0, _POW_LOOP0_DONE
+    LOCAL _POW_LOOP0, _POW_LOOP0_DONE, _POW_X_0
     mov   cx, x
+    jcxz  _POW_X_0
     mov   bx, a
     mov   res, bx
 _POW_LOOP0:
@@ -168,6 +169,8 @@ _POW_LOOP0:
     imul  bx
     mov   res, ax
     jmp   _POW_LOOP0
+_POW_X_0:
+    mov   res, 1
 _POW_LOOP0_DONE:
     nop
 ENDM
