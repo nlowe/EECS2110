@@ -75,7 +75,7 @@ ENDM
 
 _GetRadix MACRO outnum, radix, symbols, symbolLen, err_jmp_loc
     LOCAL        _GET_RADIX_LOOP0, _GET_RADIX_LOOP0_DONE
-    LOCAL        _GET_RADIX_END, _GET_RADIX_HANDLE_NEG, _GET_RADIX_APPLY_SIGN
+    LOCAL        _GET_RADIX_END, _GET_RADIX_HANDLE_NEG, _GET_RADIX_DONE
     xor          cx, cx                 ; The running total is kept in cx
     push         cx
 _GET_RADIX_LOOP0:
@@ -108,12 +108,11 @@ _GET_RADIX_LOOP0_DONE:
     pop          ax                 ; Pop the status flags into ax
     cmp          ax, 2              ; Ensure we got at least one valid character
     jnge         err_jmp_loc
-    mov          ax, 0
-    je           _GET_RADIX_APPLY_SIGN
+    je           _GET_RADIX_DONE
     mov          ax, -1
-_GET_RADIX_APPLY_SIGN:
     imul         cx
     mov          cx, ax
+_GET_RADIX_DONE:
     mov          outnum, cx
     jmp          _GET_RADIX_END
 _GET_RADIX_HANDLE_NEG:
