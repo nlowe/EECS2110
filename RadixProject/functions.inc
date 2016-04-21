@@ -42,9 +42,9 @@ _PICK_RADIX_NOT_HEX:
     add          al, bl
     mov          mem, al
 _PICK_RADIX_DONE:
-    cmp          mem, 35
+    cmp          mem, MAX_RADIX
     jg           err_jmp_loc
-    cmp          mem, 2
+    cmp          mem, MIN_RADIX
     jl           err_jmp_loc
     nop
 ENDM
@@ -75,10 +75,9 @@ ENDM
 
 _GetRadix MACRO outnum, radix, symbols, symbolLen, err_jmp_loc
     LOCAL        _GET_RADIX_LOOP0, _GET_RADIX_LOOP0_DONE
-    LOCAL        _GET_RADIX_END, _GET_RADIX_HANDLE_NEG
-    mov          cx, 1
-    push         cx
+    LOCAL        _GET_RADIX_END, _GET_RADIX_HANDLE_NEG, _GET_RADIX_APPLY_SIGN
     xor          cx, cx                 ; The running total is kept in cx
+    push         cx
 _GET_RADIX_LOOP0:
     _GetCh
     cmp          al, CR
@@ -91,6 +90,9 @@ _GET_RADIX_LOOP0:
     je           err_jmp_loc
     cmp          dl, radix
     jge          err_jmp_loc
+    pop          bx
+    or           bx, 2
+    push         bx
     push         dx
     mov          al, radix
     cbw
@@ -103,7 +105,13 @@ _GET_RADIX_LOOP0:
     jmp          _GET_RADIX_LOOP0
 _GET_RADIX_LOOP0_DONE:
     xor          dx, dx
-    pop          ax                 ; Pop the sign flag into ax
+    pop          ax                 ; Pop the status flags into ax
+    cmp          ax, 2              ; Ensure we got at least one valid character
+    jnge         err_jmp_loc
+    mov          ax, 0
+    je           _GET_RADIX_APPLY_SIGN
+    mov          ax, -1
+_GET_RADIX_APPLY_SIGN:
     imul         cx
     mov          cx, ax
     mov          outnum, cx
@@ -111,8 +119,8 @@ _GET_RADIX_LOOP0_DONE:
 _GET_RADIX_HANDLE_NEG:
     cmp          cx, 0              ; The negative symbol must be the first
     jne          err_jmp_loc        ; symbol to appear. If cx isn't zero, treat
-    pop          cx                 ; it as a bad symbol. Read the sign flag from
-    mov          cx, -1             ; the stack and push a -1
+    pop          cx                 ; it as a bad symbol. Read the flags from
+    or           cx, 1              ; the stack and set the sign flag
     push         cx
     xor          cx, cx
     jmp          _GET_RADIX_LOOP0

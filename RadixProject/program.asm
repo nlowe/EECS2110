@@ -25,7 +25,7 @@ LF                  EQU 10          ; Line Feed
 EOS                 EQU '$'         ; DOS End of string terminator
 
 MIN_RADIX           EQU 2
-MAX_RADIS           EQU 35
+MAX_RADIX           EQU 36
 
 RET_OK              EQU 00h         ; Return code for OK
 
@@ -67,85 +67,87 @@ PROMPT:
     _PickRadix outputRadix, EXIT, INVALID_RADIX
     _PutStr    blank
 
-    _PutStr   numberPrompt_A
-    _GetRadix inputA, inputRadix, radixTable, radixTableLength, INVALID_RADIX_SYMBOL
+    _PutStr    numberPrompt_A
+    mov        al, inputRadix
+    cbw
+    mov        dx, ax
+    _PutRadix  dx, 10, radixTable
+    _PutStr    numberPrompt_Radix
+    _GetRadix  inputA, inputRadix, radixTable, radixTableLength, INVALID_RADIX_SYMBOL
 
-    _PutStr   numberPrompt_B
-    _GetRadix inputB, inputRadix, radixTable, radixTableLength, INVALID_RADIX_SYMBOL
+    _PutStr    numberPrompt_B
+    mov        al, inputRadix
+    cbw
+    mov        dx, ax
+    _PutRadix  dx, 10, radixTable
+    _PutStr    numberPrompt_Radix
+    _GetRadix  inputB, inputRadix, radixTable, radixTableLength, INVALID_RADIX_SYMBOL
 
-    _PutStr   debug_1
-    _PutRadix inputA, 16, radixTable
-    _PutStr   blank
+    _PutStr    outAdd
+    mov        ax, inputA
+    mov        mathscratch, ax
+    mov        bx, inputB
+    add        mathscratch, bx
+    _PutRadix  mathscratch, outputRadix, radixTable
+    _PutStr    blank
 
-    _PutStr   debug_2
-    _PutRadix inputB, 16, radixTable
-    _PutStr   blank
+    _PutStr    outSub
+    mov        ax, inputA
+    mov        mathscratch, ax
+    mov        bx, inputB
+    sub        mathscratch, bx
+    _PutRadix  mathscratch, outputRadix, radixTable
+    _PutStr    blank
 
-    _PutStr   outAdd
-    mov       ax, inputA
-    mov       mathscratch, ax
-    mov       bx, inputB
-    add       mathscratch, bx
-    _PutRadix mathscratch, outputRadix, radixTable
-    _PutStr   blank
+    _PutStr    outMul
+    xor        dx, dx
+    mov        ax, inputA
+    imul       inputB
+    mov        mathscratch, ax
+    _PutRadix  mathscratch, outputRadix, radixTable
+    _PutStr    blank
 
-    _PutStr   outSub
-    mov       ax, inputA
-    mov       mathscratch, ax
-    mov       bx, inputB
-    sub       mathscratch, bx
-    _PutRadix mathscratch, outputRadix, radixTable
-    _PutStr   blank
-
-    _PutStr   outMul
-    xor       dx, dx
-    mov       ax, inputA
-    imul      inputB
-    mov       mathscratch, ax
-    _PutRadix mathscratch, outputRadix, radixTable
-    _PutStr   blank
-
-    _PutStr   outDiv
-    cmp       inputB, 0
-    jne       OUT_DIV
-    _PutStr   errDivByZero
-    jmp       OUT_DIV_DONE
+    _PutStr    outDiv
+    cmp        inputB, 0
+    jne        OUT_DIV
+    _PutStr    errDivByZero
+    jmp        OUT_DIV_DONE
 OUT_DIV:
-    mov       ax, inputA
+    mov        ax, inputA
     cwd
-    idiv      inputB
-    push      dx
-    mov       mathscratch, ax
-    _PutRadix mathscratch, outputRadix, radixTable
-    _PutStr   outRemainder
-    pop       dx
-    mov       mathscratch, dx
-    _PutRadix mathscratch, outputRadix, radixTable
-    _PutStr   blank
+    idiv       inputB
+    push       dx
+    mov        mathscratch, ax
+    _PutRadix  mathscratch, outputRadix, radixTable
+    _PutStr    outRemainder
+    pop        dx
+    mov        mathscratch, dx
+    _PutRadix  mathscratch, outputRadix, radixTable
+    _PutStr    blank
 OUT_DIV_DONE:
 
-    _PutStr   outPow
-    mov       ax, inputB
-    cwd                                 ; Fill dx with the sign bit of ax
-    xor       ax, dx                    ; And compute the absolute value
-    sub       ax, dx                    ; of inputB first
-    _Pow      inputA, ax, mathscratch
-    _PutRadix mathscratch, outputRadix, radixTable
-    _PutStr   blank
+    _PutStr    outPow
+    mov        ax, inputB
+    cwd                                  ; Fill dx with the sign bit of ax
+    xor        ax, dx                    ; And compute the absolute value
+    sub        ax, dx                    ; of inputB first
+    _Pow       inputA, ax, mathscratch
+    _PutRadix  mathscratch, outputRadix, radixTable
+    _PutStr    blank
 
-    jmp     PROMPT
+    jmp        PROMPT
 
 INVALID_RADIX:
-    _PutStr blank
-    _PutStr errBadRadix
-    jmp     PROMPT
+    _PutStr    blank
+    _PutStr    errBadRadix
+    jmp        PROMPT
 
 INVALID_RADIX_SYMBOL:
-    _PutStr blank
-    _PutStr errBadSymbol
-    jmp     PROMPT
+    _PutStr    blank
+    _PutStr    errBadSymbol
+    jmp        PROMPT
 
 EXIT:
-    _Exit   RET_OK
+    _Exit      RET_OK
 main            ENDP
-    END     main
+    END        main
