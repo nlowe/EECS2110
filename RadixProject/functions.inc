@@ -163,6 +163,7 @@ _PUT_RADIX_LOOP1_DONE:
     nop
 ENDM
 
+; Compute a to the power x and store the result in res. X must be positive
 _Pow MACRO a, x, res
     LOCAL _POW_LOOP0, _POW_LOOP0_DONE, _POW_X_0
     mov   cx, x
@@ -183,6 +184,7 @@ _POW_LOOP0_DONE:
     nop
 ENDM
 
+; convert the character in the specified register to uppercase if it is a letter
 _CharToUpper    MACRO   reg
     LOCAL _CHAR_TO_UPPER_DONE
     cmp   reg, LOWERCASE_START
